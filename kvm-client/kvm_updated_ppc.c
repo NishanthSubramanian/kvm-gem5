@@ -102,8 +102,9 @@ int main(void)
     ret = ioctl(vcpufd, KVM_GET_SREGS, &sregs);
     if (ret == -1)
         err(1, "KVM_GET_SREGS");
-    sregs.cs.base = 0;
-    sregs.cs.selector = 0;
+    //sregs.cs.base = 0;
+    //sregs.cs.selector = 0;
+    sregs.pvr = 0;
     ret = ioctl(vcpufd, KVM_SET_SREGS, &sregs);
     if (ret == -1)
         err(1, "KVM_SET_SREGS");

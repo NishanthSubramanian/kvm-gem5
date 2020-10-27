@@ -104,6 +104,7 @@ int main(void)
         err(1, "KVM_GET_SREGS");
     //sregs.cs.base = 0;
     //sregs.cs.selector = 0;
+    //Determines version of the processor (32 bit)
     sregs.pvr = 0;
     ret = ioctl(vcpufd, KVM_SET_SREGS, &sregs);
     if (ret == -1)

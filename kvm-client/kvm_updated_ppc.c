@@ -112,15 +112,19 @@ int main(void)
     /* Initialize registers: instruction pointer for our code, addends, and
      * initial flags required by ppc architecture. */
     struct kvm_regs regs = {
+//Count register
     .ctr = 0,
+//Link Register
 	.lr = 0,
+//Indicates overflow and carry condition
 	.xer = 0,
+//Machine state register -- specifies running in 64 bit mode
 	.msr = 0x10000000,
 	.pc = 0,
-
+//Save and restore register
 	.srr0 = 0,
 	.srr1 = 0,
-
+//Used by OS
 	.sprg0 = 0,
 	.sprg1 = 0,
 	.sprg2 = 0,
@@ -129,7 +133,7 @@ int main(void)
 	.sprg5 = 0,
 	.sprg6 = 0,
 	.sprg7 = 0,
-
+//Process ID
 	.pid = 0x0,
 
 	// qemu sets these this way (e500.c:ppce500_cpu_reset)
@@ -141,7 +145,7 @@ int main(void)
 	.gpr[7] = 0x1000,
 	.gpr[8] = 0,
 	.gpr[9] = 0,
-
+//Condition Register
 	.cr = 0x0,
     };
     ret = ioctl(vcpufd, KVM_SET_REGS, &regs);

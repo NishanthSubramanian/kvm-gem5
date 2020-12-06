@@ -21,13 +21,13 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-// #include <err.h>
+
 // #include <fcntl.h>
 // #include <linux/kvm.h>
-// #include <stdint.h>
+
 // #include <stdio.h>
 // #include <stdlib.h>
-// #include <string.h>
+
 // #include <sys/ioctl.h>
 // #include <sys/mman.h>
 // #include <sys/stat.h>
@@ -36,11 +36,11 @@
 #ifndef __powerpc64__
 #error "unsupported architecture"
 #endif
-
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <err.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <assert.h>

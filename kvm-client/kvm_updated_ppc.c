@@ -65,11 +65,13 @@ int main(void)
         0xee,             /* out %al, (%dx) */
         0xf4,             /* hlt */
     };
-    uint8_t *mem;
+//     uint8_t *mem;
+	void *vmmem;
     struct kvm_sregs sregs;
     size_t mmap_size;
     struct kvm_run *run;
     unsigned long pgsize;
+    struct kvm_userspace_memory_region vmmreg;
 
     kvm = open("/dev/kvm", O_RDWR | O_CLOEXEC);
     if (kvm == -1)
@@ -89,19 +91,31 @@ int main(void)
     pgsize = sysconf(_SC_PAGESIZE);
     /* Allocate one aligned page of guest memory to hold the code. */
 //     mem = mmap(NULL, 0x1000, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
-    mem = mmap(NULL, pgsize, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
-    if (!mem)
+    vmmem = mmap(NULL, pgsize, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+    if (!vmmem)
         err(1, "allocating guest memory");
-    memcpy(mem, code, sizeof(code));
+//     memcpy(mem, code, sizeof(code));
+		for (i = 0; i < pgsize / sizeof(unsigned int); i++)
+		((unsigned int *) vmmem)[i] = 0x60000000;
+
+	((unsigned int *) vmmem)[0] = 0x48000000;	/* b	0x0 */
+
+	memset(&vmmreg, 0, sizeof(struct kvm_userspace_memory_region));
+	vmmreg.slot = 0;
+	vmmreg.guest_phys_addr = 0x0;
+	vmmreg.memory_size = pgsize;
+	vmmreg.userspace_addr = (unsigned long) vmmem;
+	vmmreg.flags = 0;
 
     /* Map it to the second page frame (to avoid the real-mode IDT at 0). */
-    struct kvm_userspace_memory_region region = {
-        .slot = 0,
-        .guest_phys_addr = 0x1000,
-        .memory_size = 0x1000,
-        .userspace_addr = (uint64_t)mem,
-    };
-    ret = ioctl(vmfd, KVM_SET_USER_MEMORY_REGION, &region);
+//     struct kvm_userspace_memory_region region = {
+//         .slot = 0,
+//         .guest_phys_addr = 0x1000,
+//         .memory_size = 0x1000,
+//         .userspace_addr = (uint64_t)mem,
+//     };
+//     ret = ioctl(vmfd, KVM_SET_USER_MEMORY_REGION, &region);
+	ret = ioctl(vmfd, KVM_SET_USER_MEMORY_REGION, &vmmreg);
     if (ret == -1)
         err(1, "KVM_SET_USER_MEMORY_REGION");
 

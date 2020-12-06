@@ -21,17 +21,36 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-#include <err.h>
-#include <fcntl.h>
-#include <linux/kvm.h>
-#include <stdint.h>
+// #include <err.h>
+// #include <fcntl.h>
+// #include <linux/kvm.h>
+// #include <stdint.h>
+// #include <stdio.h>
+// #include <stdlib.h>
+// #include <string.h>
+// #include <sys/ioctl.h>
+// #include <sys/mman.h>
+// #include <sys/stat.h>
+// #include <sys/types.h>
+
+#ifndef __powerpc64__
+#error "unsupported architecture"
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/ioctl.h>
+
+#include <errno.h>
+#include <fcntl.h>
+#include <assert.h>
+#include <unistd.h>
+
 #include <sys/mman.h>
 #include <sys/stat.h>
+#include <sys/ioctl.h>
 #include <sys/types.h>
+#include <linux/kvm.h>
 
 #define EPAPR_MAGIC (0x45504150)
 int main(void)

@@ -143,11 +143,11 @@ int main(void)
     //sregs.cs.base = 0;
     //sregs.cs.selector = 0;
     //Determines version of the processor (32 bit)
-    sregs.pvr = 0;
-    ret = ioctl(vcpufd, KVM_SET_SREGS, &sregs);
-    if (ret == -1)
-        err(1, "KVM_SET_SREGS");
+//     sregs.pvr = 0;
 
+//     ret = ioctl(vcpufd, KVM_SET_SREGS, &sregs);
+//     if (ret == -1)
+//         err(1, "KVM_SET_SREGS");
     /* Initialize registers: instruction pointer for our code, addends, and
      * initial flags required by ppc architecture. */
     struct kvm_regs regs = {
@@ -187,9 +187,9 @@ int main(void)
 //Condition Register
 	.cr = 0x0,
     };
-//     ret = ioctl(vcpufd, KVM_SET_REGS, &regs);
-//     if (ret == -1)
-//         err(1, "KVM_SET_REGS");
+    ret = ioctl(vcpufd, KVM_SET_REGS, &regs);
+    if (ret == -1)
+        err(1, "KVM_SET_REGS");
 //     printf("kvm pvr = 0x%08x\n", regs.pvr);
     printf("kvm msr = 0x%016lx\n", regs.msr);
 	printf("kvm regs gpr[1] = 0x%016lx\n", regs.gpr[1]);

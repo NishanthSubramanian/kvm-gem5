@@ -50,6 +50,7 @@ int main(void)
     struct kvm_sregs sregs;
     size_t mmap_size;
     struct kvm_run *run;
+    unsigned long pgsize;
 
     kvm = open("/dev/kvm", O_RDWR | O_CLOEXEC);
     if (kvm == -1)
@@ -62,12 +63,14 @@ int main(void)
     if (ret != 12)
         errx(1, "KVM_GET_API_VERSION %d, expected 12", ret);
 
-    vmfd = ioctl(kvm, KVM_CREATE_VM, (unsigned long)0);
+    vmfd = ioctl(kvm, KVM_CREATE_VM, KVM_VM_PPC_HV);
     if (vmfd == -1)
         err(1, "KVM_CREATE_VM");
 
+    pgsize = sysconf(_SC_PAGESIZE);
     /* Allocate one aligned page of guest memory to hold the code. */
-    mem = mmap(NULL, 0x1000, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+//     mem = mmap(NULL, 0x1000, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+    mem = mmap(NULL, pgsize, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
     if (!mem)
         err(1, "allocating guest memory");
     memcpy(mem, code, sizeof(code));
@@ -83,7 +86,8 @@ int main(void)
     if (ret == -1)
         err(1, "KVM_SET_USER_MEMORY_REGION");
 
-    vcpufd = ioctl(vmfd, KVM_CREATE_VCPU, (unsigned long)0);
+//     vcpufd = ioctl(vmfd, KVM_CREATE_VCPU, (unsigned long)0);
+    vcpufd = ioctl(vmfd, KVM_CREATE_VCPU, 0UL);
     if (vcpufd == -1)
         err(1, "KVM_CREATE_VCPU");
 
@@ -94,6 +98,7 @@ int main(void)
     mmap_size = ret;
     if (mmap_size < sizeof(*run))
         errx(1, "KVM_GET_VCPU_MMAP_SIZE unexpectedly small");
+	
     run = mmap(NULL, mmap_size, PROT_READ | PROT_WRITE, MAP_SHARED, vcpufd, 0);
     if (!run)
         err(1, "mmap vcpu");
@@ -139,8 +144,8 @@ int main(void)
 
 	// qemu sets these this way (e500.c:ppce500_cpu_reset)
 	.gpr[1] = (16<<20) - 8,
-	.gpr[3] = 0,
-	.gpr[4] = 0,
+	.gpr[3] = 0xdead,
+	.gpr[4] = 0xbeef,
 	.gpr[5] = 0,
 	.gpr[6] = EPAPR_MAGIC,
 	.gpr[7] = 0x1000,
@@ -152,7 +157,11 @@ int main(void)
     ret = ioctl(vcpufd, KVM_SET_REGS, &regs);
     if (ret == -1)
         err(1, "KVM_SET_REGS");
-
+    printf("kvm pvr = 0x%08x\n", regs.pvr);
+    printf("kvm msr = 0x%016lx\n", regs.msr);
+	printf("kvm regs gpr[1] = 0x%016lx\n", regs.gpr[1]);
+	printf("kvm regs gpr[3] = 0x%016lx\n", regs.gpr[3]);
+	printf("kvm regs pc = 0x%016lx\n", regs.pc);
     /* Repeatedly run code and handle VM exits. */
     while (1) {
         ret = ioctl(vcpufd, KVM_RUN, NULL);

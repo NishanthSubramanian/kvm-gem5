@@ -260,5 +260,5 @@ ioctl() at run-time.
             errx(1, "exit_reason = 0x%x", run->exit_reason);
         }
     }
-    printf("aftere execution kvm regs gpr[9] = 0x%016lx\n", vmregs.gpr[9]);
+    printf("aftere execution kvm regs gpr[9] = 0x%016lx\n", regs.gpr[9]);
 }

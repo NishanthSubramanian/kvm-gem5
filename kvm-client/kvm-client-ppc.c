@@ -127,6 +127,7 @@ static void setup_protected_mode(struct kvm_sregs *sregs)
 	sregs->cr0 |= CR0_PE; /* enter protected mode */
 
 	sregs->cs = seg;
+	sregs->pvr = 0;
 
 	seg.type = 3; /* Data: read/write, accessed */
 	seg.selector = 2 << 3;

@@ -56,6 +56,7 @@
 int main(void)
 {
     int kvm, vmfd, vcpufd, ret, i;
+    unsigned long number_of_instructions = 10;
     // const uint8_t code[] = {
     //     0xba, 0xf8, 0x03, /* mov $0x3f8, %dx */
     //     0x00, 0xd8,       /* add %bl, %al */
@@ -107,19 +108,31 @@ ioctl() at run-time.
         err(1, "KVM_CREATE_VM");
 
     // Run time page size
-    pgsize = sysconf(_SC_PAGESIZE);
+    // pgsize = sysconf(_SC_PAGESIZE);
 
     /* Allocate one aligned page of guest memory to hold the code. */
     //     mem = mmap(NULL, 0x1000, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
-    vmmem = mmap(NULL, pgsize, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+    vmmem = mmap(NULL, number_of_instructions, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
     if (!vmmem)
         err(1, "allocating guest memory");
     //     memcpy(mem, code, sizeof(code));
 
     // Why is this being done?
     // Why these particular values?
-    for (i = 0; i < pgsize / sizeof(unsigned int); i++)
-        ((unsigned int *)vmmem)[i] = 0x60000000;
+    
+    // for (i = 0; i < pgsize / sizeof(unsigned int); i++)
+    //     ((unsigned int *)vmmem)[i] = 0x60000000;
+
+    ((unsigned int *)vmmem)[1] = 0x39200002;
+    ((unsigned int *)vmmem)[2] = 0x913f0020;
+    ((unsigned int *)vmmem)[3] = 0x3900000a;
+    ((unsigned int *)vmmem)[4] = 0x913f0024;
+    ((unsigned int *)vmmem)[5] = 0x815f0020;
+    ((unsigned int *)vmmem)[6] = 0x813f0024;
+    ((unsigned int *)vmmem)[7] = 0x7d2a4a14;
+    ((unsigned int *)vmmem)[8] = 0x913f0028;
+    ((unsigned int *)vmmem)[9] = 0x60000000;
+
 
     ((unsigned int *)vmmem)[0] = 0x48000000; /* b	0x0 */
 
@@ -247,4 +260,5 @@ ioctl() at run-time.
             errx(1, "exit_reason = 0x%x", run->exit_reason);
         }
     }
+    printf("aftere execution kvm regs gpr[9] = 0x%016lx\n", vmregs.gpr[9]);
 }

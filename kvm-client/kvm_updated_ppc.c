@@ -234,13 +234,15 @@ ioctl() at run-time.
     printf("kvm regs gpr[1] = 0x%016lx\n", regs.gpr[1]);
     printf("kvm regs gpr[3] = 0x%016lx\n", regs.gpr[3]);
     printf("kvm regs pc = 0x%016lx\n", regs.pc);
-    string error_string = "kvm error has occurred, and exit is cause " ;
+    char error_string[100] = "kvm error has occurred, and exit is cause " ;
     /* Repeatedly run code and handle VM exits. */
     while (1)
     {
         ret = ioctl(vcpufd, KVM_RUN, NULL);
         if (ret == -1){
-            error_string = error_string +  run->exit_reason;
+            char error_cause[10];
+            sprintf(error_cause, "%x", kvm->exit_reason);
+            strcat(error_string, error_cause); 
             puts(error_string);
             err(1, "KVM_RUN");
         }

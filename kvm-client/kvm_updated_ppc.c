@@ -119,7 +119,7 @@ ioctl() at run-time.
 
     // Why is this being done?
     // Why these particular values?
-    
+    printf("page size id %d\n", pgsize);
     for (i = 0; i < pgsize / sizeof(unsigned int); i++)
         ((unsigned int *)vmmem)[i] = 0x60000000;
 
@@ -238,8 +238,10 @@ ioctl() at run-time.
     while (1)
     {
         ret = ioctl(vcpufd, KVM_RUN, NULL);
-        if (ret == -1)
+        if (ret == -1){
+            puts("kvm error has occurred");
             err(1, "KVM_RUN");
+        }
         switch (run->exit_reason)
         {
         case KVM_EXIT_HLT:

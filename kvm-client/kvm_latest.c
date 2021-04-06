@@ -141,7 +141,8 @@ int main(int argc, char **argv)
 	((unsigned int *) vmmem)[0] = PPC_RAW_ORIS(13, 13, 0xdead);
 	((unsigned int *) vmmem)[1] = PPC_RAW_ORI(14, 14, 0xbeef);
 	((unsigned int *) vmmem)[2] = PPC_RAW_ADD(15, 13, 14);
-	((unsigned int *) vmmem)[i - 1] = PPC_RAW_BRANCH(0, 0, 0);
+	PPC_RAW_NOP();
+// 	((unsigned int *) vmmem)[i - 1] = PPC_RAW_BRANCH(0, 0, 0);
 
 	memset(&vmmreg, 0, sizeof(struct kvm_userspace_memory_region));
 	vmmreg.slot = 0;

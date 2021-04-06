@@ -131,18 +131,21 @@ int main(int argc, char **argv)
 	syscall_assert(vmfd < 0, __FILE__, __LINE__, "ioctl");
 
 	pgsize = sysconf(_SC_PAGESIZE);
+	//pgsize = 4 * sizeof(unsigned int);	
 	vmmem = mmap(NULL, pgsize, PROT_READ | PROT_WRITE | PROT_EXEC,
 		     MAP_SHARED | MAP_ANONYMOUS | MAP_LOCKED, -1, 0);
 	syscall_assert(vmmem == MAP_FAILED, __FILE__, __LINE__, "mmap");
 
+	printf("number of loops: %ld", pgsize/sizeof(unsigned int));
+
 	for (i = 0; i < pgsize / sizeof(unsigned int); i++)
-		((unsigned int *) vmmem)[i] = PPC_RAW_ADDI(12, 12, 0);
+		((unsigned int *) vmmem)[i] = PPC_RAW_ADDI(12, 12, 1);
 
 	((unsigned int *) vmmem)[0] = PPC_RAW_ORIS(13, 13, 0xdead);
 	((unsigned int *) vmmem)[1] = PPC_RAW_ORI(14, 14, 0xbeef);
 	((unsigned int *) vmmem)[2] = PPC_RAW_ADD(15, 13, 14);
-// 	PPC_RAW_NOP();
-// 	((unsigned int *) vmmem)[i - 1] = PPC_RAW_BRANCH(0, 0, 0);
+ 	((unsigned int *) vmmem)[i - 1] = 0x80010001;
+//	((unsigned int *) vmmem)[i-1] = PPC_RAW_NOP();
 
 	memset(&vmmreg, 0, sizeof(struct kvm_userspace_memory_region));
 	vmmreg.slot = 0;
@@ -195,6 +198,7 @@ int main(int argc, char **argv)
 	sigint_action.sa_restorer = 0;
 	ret = sigaction(SIGINT, &sigint_action, NULL);
 	syscall_assert(ret < 0, __FILE__, __LINE__, "sigaction");
+	int flag = 1;
 
 	do {
 		ret = ioctl(vcpufd, KVM_RUN, NULL);
@@ -218,12 +222,14 @@ int main(int argc, char **argv)
 			break;
 		default:
 			printf("kvm exited with code %d\n", vmrun->exit_reason);
+			flag = 0;
+			break;
 		}
 
 		if (ret == -1 && errno == EINTR) {
 			break;
 		}
-	} while (true);
+	} while (flag);
 
 	kvm_show_registers();
 	munmap(vmrun, vcpumsize);

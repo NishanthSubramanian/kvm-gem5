@@ -2,7 +2,7 @@
 
 This repository contains files relevant to the work for designing KVM CLient for the Power architecture. There are two subdirectories in the repo:
 1. Machine Code: This folder contains files associated with generating the object code/ sequence of instructions which will be run on the KVM Client.
-2. kvm-client: This folder contains all the files relevant to designing a kvm client for POWER Architecture.
+2. kvm-client: This folder contains all the files relevant to designing a kvm client for x86 and POWER Architecture.
 
 
 Relevant file:

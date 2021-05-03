@@ -10,3 +10,4 @@ powerpc64le-linux-gnu-objdump -dS power
 ```
 For example we are on an x86 machine and we want to generate the sequence of instructions of a source code for the power architecture. The first command will generate
 the object code in a file called "power". We then dissassemble it using the objdump command.
+Note that we didnt use any standard libraries to make it easier for us to read the disassembled code, and thats why we used nostdlib when we compiled.

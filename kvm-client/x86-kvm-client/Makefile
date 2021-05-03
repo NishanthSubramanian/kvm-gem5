@@ -1,22 +1,22 @@
 CFLAGS = -Wall -Wextra -Werror -O2
 
 .PHONY: run
-run: kvm-client
-	./kvm-client
+run: x86-kvm-client
+	./x86-kvm-client
 
-kvm-client: kvm-client.o payload.o
+x86-kvm-client: x86-kvm-client.o payload.o
 	$(CC) $^ -o $@
 
 payload.o: payload.ld guest16.o guest32.img.o guest64.img.o
 	$(LD) -T $< -o $@
 
-guest64.o: intro.c
+guest64.o: guest-code.c
 	$(CC) $(CFLAGS) -m64 -ffreestanding -fno-pic -c -o $@ $^
 
 guest64.img: guest64.o
 	$(LD) -T guest.ld $^ -o $@
 
-guest32.o: intro.c
+guest32.o: guest-code.c
 	$(CC) $(CFLAGS) -m32 -ffreestanding -fno-pic -c -o $@ $^
 
 guest32.img: guest32.o
@@ -27,6 +27,6 @@ guest32.img: guest32.o
 
 .PHONY: clean
 clean:
-	$(RM) kvm-client kvm-client.o payload.o guest16.o \
+	$(RM) x86-kvm-client x86-kvm-client.o payload.o guest16.o \
 		guest32.o guest32.img guest32.img.o \
 		guest64.o guest64.img guest64.img.o
